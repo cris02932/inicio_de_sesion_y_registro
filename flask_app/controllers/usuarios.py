@@ -10,6 +10,14 @@ def inicio():
     return render_template('index.html')
 
 
+@app.route('/pagina_principal')
+def pagina_principal():
+    if 'usuario_id' not in session:
+        return redirect('/')
+
+    return render_template('cerrar_sesion.html')
+
+
 #registro crear usuario
 @app.route("/crear_usuario", methods=["POST"])
 def crear_usuario():
@@ -23,14 +31,16 @@ def crear_usuario():
     #--- YO DEBERÍA VALIDAR QUE LOS DATOS INGRESADOS
     #--- SEAN VALIDOS
 
-    if not crear_usuario.Usuario(request.form):
+    if not Usuario.validar_registro(request.form):
         print("Usuario Invalido")
         return redirect('/')
 
     #--- VALIDACIONES ---
     #Hasheamos la contraseña
 
-    pass_hasheado = bcrypt.generate_password_hash(request.form['password'])
+    pass_hasheado = bcrypt.generate_password_hash(
+        request.form['password']
+    ).decode('utf-8')
 
     datos_usuario_registro = {
         "nombre": request.form ['nombre'],
@@ -44,7 +54,7 @@ def crear_usuario():
 
     session['usuario_id'] = nuevo_id
 
-    return redirect('/cerrar_sesion.html')
+    return redirect('/')
 
 
 
@@ -61,7 +71,7 @@ def iniciar_sesion():
 
     session['usuario_id'] = usuario.id
     session['nombre'] = usuario.nombre
-    return redirect('/cine')
+    return redirect('/pagina_principal')
 
 
 #cerrar sesión
